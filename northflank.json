@@ -1,0 +1,20 @@
+{
+  "apiVersion": "v1",
+  "spec": {
+    "kind": "Workflow",
+    "spec": {
+      "type": "sequential",
+      "steps": []
+    }
+  },
+  "name": "Dify",
+  "description": "",
+  "project": {
+    "spec": {
+      "name": "FableBard",
+      "region": "europe-west",
+      "description": ""
+    }
+  },
+  "$schema": "https://api.northflank.com/v1/schemas/template"
+}
