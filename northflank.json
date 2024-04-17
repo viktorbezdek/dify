@@ -335,7 +335,7 @@
               {
                 "internalPort": 3000,
                 "protocol": "HTTP",
-                "public": false,
+                "public": true,
                 "name": "p01",
                 "domains": [],
                 "security": {
