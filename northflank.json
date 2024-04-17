@@ -4,17 +4,389 @@
     "kind": "Workflow",
     "spec": {
       "type": "sequential",
-      "steps": []
+      "steps": [
+        {
+          "kind": "Addon",
+          "spec": {
+            "tlsEnabled": true,
+            "billing": {
+              "replicas": 1,
+              "storage": 4096,
+              "storageClass": "ssd",
+              "deploymentPlan": "nf-compute-20"
+            },
+            "typeSpecificSettings": {
+              "postgresqlConnectionPoolerReplicas": 2,
+              "postgresqlReadConnectionPoolerReplicas": 2
+            },
+            "type": "postgresql",
+            "name": "postgres",
+            "version": "15",
+            "externalAccessEnabled": false,
+            "ipPolicies": [],
+            "pitrEnabled": false
+          },
+          "ref": "db"
+        },
+        {
+          "kind": "Addon",
+          "spec": {
+            "tlsEnabled": true,
+            "billing": {
+              "replicas": 1,
+              "storage": 4096,
+              "storageClass": "ssd",
+              "deploymentPlan": "nf-compute-10"
+            },
+            "typeSpecificSettings": {},
+            "type": "redis",
+            "name": "redis",
+            "version": "6.2.14",
+            "externalAccessEnabled": false,
+            "ipPolicies": [],
+            "pitrEnabled": false
+          },
+          "ref": "redis"
+        },
+        {
+          "kind": "Volume",
+          "spec": {
+            "spec": {
+              "storageSize": 5120,
+              "storageClassName": "ssd",
+              "accessMode": "ReadWriteOnce"
+            },
+            "name": "storage",
+            "mounts": [
+              {
+                "containerMountPath": "/data",
+                "volumeMountPath": ""
+              }
+            ]
+          },
+          "ref": "storage"
+        },
+        {
+          "kind": "DeploymentService",
+          "spec": {
+            "deployment": {
+              "instances": 1,
+              "storage": {
+                "ephemeralStorage": {
+                  "storageSize": 1024
+                },
+                "shmSize": 64
+              },
+              "docker": {
+                "configType": "default"
+              },
+              "external": {
+                "imagePath": "semitechnologies/weaviate:1.19.0"
+              }
+            },
+            "runtimeEnvironment": {
+              "QUERY_DEFAULTS_LIMIT": "25",
+              "AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED": "false",
+              "PERSISTENCE_DATA_PATH": "/var/lib/weaviate",
+              "DEFAULT_VECTORIZER_MODULE": "none",
+              "CLUSTER_HOSTNAME": "node1",
+              "AUTHENTICATION_APIKEY_ENABLED": "true",
+              "AUTHENTICATION_APIKEY_ALLOWED_KEYS": "WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih",
+              "AUTHENTICATION_APIKEY_USERS": "hello@dify.ai",
+              "AUTHORIZATION_ADMINLIST_ENABLED": "true",
+              "AUTHORIZATION_ADMINLIST_USERS": "hello@dify.ai"
+            },
+            "runtimeFiles": {},
+            "billing": {
+              "deploymentPlan": "nf-compute-10"
+            },
+            "name": "weaviate",
+            "ports": []
+          },
+          "ref": "weaviate"
+        },
+        {
+          "kind": "DeploymentService",
+          "spec": {
+            "deployment": {
+              "instances": 1,
+              "storage": {
+                "ephemeralStorage": {
+                  "storageSize": 1024
+                },
+                "shmSize": 64
+              },
+              "docker": {
+                "configType": "default"
+              },
+              "external": {
+                "imagePath": "langgenius/dify-api:latest"
+              }
+            },
+            "runtimeEnvironment": {
+              "MODE": "api",
+              "LOG_LEVEL": "INFO",
+              "SECRET_KEY": "sk-9f73s3ljTXVcMT3Blb3ljTqtsKiGHXVcMT3BlbkFJLK7U",
+              "CONSOLE_WEB_URL": "",
+              "INIT_PASSWORD": "",
+              "CONSOLE_API_URL": "",
+              "SERVICE_API_URL": "",
+              "APP_WEB_URL": "",
+              "FILES_URL": "",
+              "MIGRATION_ENABLED": "true",
+              "DB_USERNAME": "postgres",
+              "DB_PASSWORD": "difyai123456",
+              "DB_HOST": "db",
+              "DB_PORT": "5432",
+              "DB_DATABASE": "dify",
+              "REDIS_HOST": "redis",
+              "REDIS_PORT": "6379",
+              "REDIS_USERNAME": "",
+              "REDIS_PASSWORD": "difyai123456",
+              "REDIS_USE_SSL": "false",
+              "REDIS_DB": "0",
+              "CELERY_BROKER_URL": "redis://:difyai123456@redis:6379/1",
+              "WEB_API_CORS_ALLOW_ORIGINS": "*",
+              "CONSOLE_CORS_ALLOW_ORIGINS": "*",
+              "STORAGE_TYPE": "local",
+              "STORAGE_LOCAL_PATH": "storage",
+              "S3_ENDPOINT": "https://xxx.r2.cloudflarestorage.com",
+              "S3_BUCKET_NAME": "difyai",
+              "S3_ACCESS_KEY": "ak-difyai",
+              "S3_SECRET_KEY": "sk-difyai",
+              "S3_REGION": "us-east-1",
+              "AZURE_BLOB_ACCOUNT_NAME": "difyai",
+              "AZURE_BLOB_ACCOUNT_KEY": "difyai",
+              "AZURE_BLOB_CONTAINER_NAME": "difyai-container",
+              "AZURE_BLOB_ACCOUNT_URL": "https://<your_account_name>.blob.core.windows.net",
+              "VECTOR_STORE": "weaviate",
+              "WEAVIATE_ENDPOINT": "http://weaviate:8080",
+              "WEAVIATE_API_KEY": "WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih",
+              "QDRANT_URL": "http://qdrant:6333",
+              "QDRANT_API_KEY": "difyai123456",
+              "QDRANT_CLIENT_TIMEOUT": "20",
+              "MILVUS_HOST": "127.0.0.1",
+              "MILVUS_PORT": "19530",
+              "MILVUS_USER": "root",
+              "MILVUS_PASSWORD": "Milvus",
+              "MILVUS_SECURE": "false",
+              "MAIL_TYPE": "",
+              "MAIL_DEFAULT_SEND_FROM": "YOUR EMAIL FROM (eg=no-reply <no-reply@dify.ai>)",
+              "SMTP_SERVER": "",
+              "SMTP_PORT": "587",
+              "SMTP_USERNAME": "",
+              "SMTP_PASSWORD": "",
+              "SMTP_USE_TLS": "true",
+              "RESEND_API_KEY": "",
+              "RESEND_API_URL": "https://api.resend.com",
+              "SENTRY_DSN": "",
+              "SENTRY_TRACES_SAMPLE_RATE": "1.0",
+              "SENTRY_PROFILES_SAMPLE_RATE": "1.0",
+              "CODE_EXECUTION_ENDPOINT": "http://sandbox:8194",
+              "CODE_EXECUTION_API_KEY": "dify-sandbox",
+              "CODE_MAX_NUMBER": "9223372036854775807",
+              "CODE_MIN_NUMBER": "-9223372036854775808",
+              "CODE_MAX_STRING_LENGTH": "80000",
+              "TEMPLATE_TRANSFORM_MAX_LENGTH": "80000",
+              "CODE_MAX_STRING_ARRAY_LENGTH": "30",
+              "CODE_MAX_OBJECT_ARRAY_LENGTH": "30",
+              "CODE_MAX_NUMBER_ARRAY_LENGTH": "1000"
+            },
+            "runtimeFiles": {},
+            "billing": {
+              "deploymentPlan": "nf-compute-10"
+            },
+            "name": "api",
+            "ports": [
+              {
+                "internalPort": 5001,
+                "protocol": "TCP",
+                "public": false,
+                "name": "p01",
+                "domains": [],
+                "security": {
+                  "policies": [],
+                  "credentials": []
+                },
+                "disableNfDomain": false
+              }
+            ]
+          },
+          "ref": "api"
+        },
+        {
+          "kind": "DeploymentService",
+          "spec": {
+            "deployment": {
+              "instances": 1,
+              "storage": {
+                "ephemeralStorage": {
+                  "storageSize": 1024
+                },
+                "shmSize": 64
+              },
+              "docker": {
+                "configType": "default"
+              },
+              "external": {
+                "imagePath": "langgenius/dify-api:latest"
+              }
+            },
+            "runtimeEnvironment": {
+              "MODE": "worker",
+              "LOG_LEVEL": "INFO",
+              "SECRET_KEY": "sk-9f73s3ljTXVcMT3Blb3ljTqtsKiGHXVcMT3BlbkFJLK7U",
+              "DB_USERNAME": "postgres",
+              "DB_PASSWORD": "difyai123456",
+              "DB_HOST": "db",
+              "DB_PORT": "5432",
+              "DB_DATABASE": "dify",
+              "REDIS_HOST": "redis",
+              "REDIS_PORT": "6379",
+              "REDIS_USERNAME": "",
+              "REDIS_PASSWORD": "difyai123456",
+              "REDIS_DB": "0",
+              "REDIS_USE_SSL": "false",
+              "CELERY_BROKER_URL": "redis://:difyai123456@redis:6379/1",
+              "STORAGE_TYPE": "local",
+              "STORAGE_LOCAL_PATH": "storage",
+              "S3_ENDPOINT": "https://xxx.r2.cloudflarestorage.com",
+              "S3_BUCKET_NAME": "difyai",
+              "S3_ACCESS_KEY": "ak-difyai",
+              "S3_SECRET_KEY": "sk-difyai",
+              "S3_REGION": "us-east-1",
+              "AZURE_BLOB_ACCOUNT_NAME": "difyai",
+              "AZURE_BLOB_ACCOUNT_KEY": "difyai",
+              "AZURE_BLOB_CONTAINER_NAME": "difyai-container",
+              "AZURE_BLOB_ACCOUNT_URL": "https://<your_account_name>.blob.core.windows.net",
+              "VECTOR_STORE": "weaviate",
+              "WEAVIATE_ENDPOINT": "http://weaviate:8080",
+              "WEAVIATE_API_KEY": "WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih",
+              "QDRANT_URL": "http://qdrant:6333",
+              "QDRANT_API_KEY": "difyai123456",
+              "QDRANT_CLIENT_TIMEOUT": "20",
+              "MILVUS_HOST": "127.0.0.1",
+              "MILVUS_PORT": "19530",
+              "MILVUS_USER": "root",
+              "MILVUS_PASSWORD": "Milvus",
+              "MILVUS_SECURE": "false",
+              "MAIL_TYPE": "",
+              "MAIL_DEFAULT_SEND_FROM": "YOUR EMAIL FROM (eg=no-reply <no-reply@dify.ai>)",
+              "RESEND_API_KEY": "",
+              "RESEND_API_URL": "https://api.resend.com",
+              "RELYT_HOST": "db",
+              "RELYT_PORT": "5432",
+              "RELYT_USER": "postgres",
+              "RELYT_PASSWORD": "difyai123456",
+              "RELYT_DATABASE": "postgres"
+            },
+            "runtimeFiles": {},
+            "billing": {
+              "deploymentPlan": "nf-compute-10"
+            },
+            "name": "worker",
+            "ports": [
+              {
+                "internalPort": 5001,
+                "protocol": "TCP",
+                "public": false,
+                "name": "p01",
+                "domains": [],
+                "security": {
+                  "policies": [],
+                  "credentials": []
+                },
+                "disableNfDomain": false
+              }
+            ]
+          },
+          "ref": "worker"
+        },
+        {
+          "kind": "DeploymentService",
+          "spec": {
+            "deployment": {
+              "instances": 1,
+              "storage": {
+                "ephemeralStorage": {
+                  "storageSize": 1024
+                },
+                "shmSize": 64
+              },
+              "docker": {
+                "configType": "default"
+              },
+              "external": {
+                "imagePath": "langgenius/dify-web:latest"
+              }
+            },
+            "runtimeEnvironment": {
+              "EDITION": "SELF_HOSTED",
+              "CONSOLE_API_URL": "",
+              "APP_API_URL": "",
+              "SENTRY_DSN": ""
+            },
+            "runtimeFiles": {},
+            "billing": {
+              "deploymentPlan": "nf-compute-10"
+            },
+            "name": "web",
+            "ports": [
+              {
+                "internalPort": 3000,
+                "protocol": "HTTP",
+                "public": false,
+                "name": "p01",
+                "domains": [],
+                "security": {
+                  "policies": [],
+                  "credentials": []
+                },
+                "disableNfDomain": false
+              }
+            ]
+          },
+          "ref": "web"
+        },
+        {
+          "kind": "DeploymentService",
+          "spec": {
+            "deployment": {
+              "instances": 1,
+              "storage": {
+                "ephemeralStorage": {
+                  "storageSize": 1024
+                },
+                "shmSize": 64
+              },
+              "docker": {
+                "configType": "default"
+              },
+              "external": {
+                "imagePath": "langgenius/dify-sandbox:latest"
+              }
+            },
+            "runtimeEnvironment": {
+              "API_KEY": "dify-sandbox",
+              "GIN_MODE": "release",
+              "WORKER_TIMEOUT": "15"
+            },
+            "runtimeFiles": {},
+            "billing": {
+              "deploymentPlan": "nf-compute-10"
+            },
+            "name": "sandbox",
+            "ports": []
+          },
+          "ref": "sandbox"
+        }
+      ]
     }
   },
   "name": "Dify",
   "description": "",
   "project": {
-    "spec": {
-      "name": "FableBard",
-      "region": "europe-west",
-      "description": ""
-    }
+    "id": "fablebard"
   },
   "$schema": "https://api.northflank.com/v1/schemas/template"
 }
